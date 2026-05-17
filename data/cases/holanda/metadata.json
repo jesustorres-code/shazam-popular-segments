@@ -1,0 +1,20 @@
+{
+  "title": "holanda",
+  "artist": "EL DE LA TINTA",
+  "deezerId": 3886700541,
+  "isrc": "MXUM72503506",
+  "durationSeconds": 224,
+  "shazamPopularSegment": {
+    "start": "00:00",
+    "end": "00:05",
+    "startSeconds": 0,
+    "endSeconds": 5
+  },
+  "recommendedSevenSecondClip": {
+    "start": "00:00",
+    "end": "00:07",
+    "startSeconds": 0,
+    "endSeconds": 7
+  },
+  "preview": "https://cdnt-preview.dzcdn.net/api/1/1/0/0/4/0/004931394475b7f09a9feeaeb8d7146c.mp3?hdnea=exp=1779050584~acl=/api/1/1/0/0/4/0/004931394475b7f09a9feeaeb8d7146c.mp3*~data=user_id=0,application_id=42~hmac=0a57370790818677e8e8519ff99f2d53f8c2b3b712e21e6e415dc6cfd4a6f03e"
+}

@@ -1,0 +1,13 @@
+# Local/generated media
+outputs/clips/
+inputs/screenshots/
+
+# Runtime/cache
+.DS_Store
+*.log
+tmp/
+cache/
+
+# Secrets/config
+.env
+.env.*
