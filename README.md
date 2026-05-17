@@ -27,6 +27,7 @@ Requirements:
 - `git`
 - `ffmpeg`
 - `bash`
+- Python 3.10+
 
 Clone:
 
@@ -42,12 +43,18 @@ sudo apt-get update
 sudo apt-get install -y ffmpeg
 ```
 
+Install the CLI:
+
+```bash
+python3 -m pip install --user .
+```
+
 ## Usage
 
 Extract a clip from a local audio file:
 
 ```bash
-scripts/extract-clip.sh input.mp3 0 5 outputs/clips/example-00-05.mp3
+shazam-segment extract --audio input.mp3 --start 0 --duration 5 --output outputs/clips/example-00-05.mp3
 ```
 
 Arguments:
@@ -60,13 +67,28 @@ Arguments:
 For a Shazam Popular Segment shown as `00:00 - 00:05`, use:
 
 ```bash
-scripts/extract-clip.sh input.mp3 0 5 outputs/clips/song-popular-00-05.mp3
+shazam-segment extract --audio input.mp3 --start 00:00 --end 00:05 --output outputs/clips/song-popular-00-05.mp3
 ```
 
 For a 7-second video clip starting at the same point:
 
 ```bash
-scripts/extract-clip.sh input.mp3 0 7 outputs/clips/song-video-00-07.mp3
+shazam-segment extract --audio input.mp3 --start 00:00 --duration 7 --output outputs/clips/song-video-00-07.mp3
+```
+
+Extract from a case JSON file:
+
+```bash
+shazam-segment extract \
+  --audio input.mp3 \
+  --case data/cases/holanda/metadata.json \
+  --output outputs/clips/holanda-popular.mp3
+```
+
+Search metadata:
+
+```bash
+shazam-segment metadata "EL DE LA TINTA Sahir Montoya holanda" --provider deezer
 ```
 
 ## Current Case

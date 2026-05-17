@@ -8,24 +8,31 @@ Ubuntu/Debian:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y git ffmpeg
+sudo apt-get install -y git ffmpeg python3 python3-pip
 git clone https://github.com/jesustorres-code/shazam-popular-segments.git
 cd shazam-popular-segments
+python3 -m pip install --user .
+```
+
+For development without installing, run commands with `PYTHONPATH=src`:
+
+```bash
+PYTHONPATH=src python3 -m shazam_segments.cli --help
 ```
 
 Verify:
 
 ```bash
-scripts/extract-clip.sh --help
+shazam-segment --help
 ```
 
-The command above should print usage and exit with a non-zero status because no arguments were supplied. That is expected.
+The command above should print usage.
 
 ## Run A Clip Extraction
 
 ```bash
 mkdir -p outputs/clips
-scripts/extract-clip.sh /path/to/song.mp3 0 5 outputs/clips/song-popular-00-05.mp3
+shazam-segment extract --audio /path/to/song.mp3 --start 0 --duration 5 --output outputs/clips/song-popular-00-05.mp3
 ```
 
 ## Operational Model

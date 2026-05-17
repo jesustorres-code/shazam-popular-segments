@@ -12,7 +12,7 @@ The project can already:
 - extract 5s and 7s clips with `ffmpeg`
 - run from a public GitHub repository
 
-## Next Step: Stage 2
+## Current Implementation Focus: Stage 2
 
 Turn the prototype into a reproducible command-line tool.
 
@@ -25,7 +25,7 @@ Turn the prototype into a reproducible command-line tool.
 
 ### Tasks
 
-1. Create a proper CLI entrypoint.
+1. Create a proper CLI entrypoint. (initial version done)
    Example:
    ```bash
    shazam-segment extract --audio song.mp3 --start 0 --duration 7
@@ -46,7 +46,7 @@ Turn the prototype into a reproducible command-line tool.
    }
    ```
 
-3. Add metadata lookup helpers.
+3. Add metadata lookup helpers. (initial Deezer/iTunes helpers done)
    Initial providers:
    - Deezer
    - iTunes Search API
@@ -55,7 +55,7 @@ Turn the prototype into a reproducible command-line tool.
    First version can accept manually entered timestamps.
    Later version should use OCR/vision.
 
-5. Add tests.
+5. Add tests. (initial timecode/case tests done)
    Cover timestamp parsing, duration math, output naming, and ffmpeg command generation.
 
 6. Improve deployment docs.

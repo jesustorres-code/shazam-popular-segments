@@ -7,6 +7,9 @@ inputs/screenshots/
 *.log
 tmp/
 cache/
+build/
+dist/
+*.egg-info/
 
 # Secrets/config
 .env
