@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,23 @@ def write_case(path: str | Path, data: dict[str, Any]) -> None:
 def slugify(value: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.lower()).strip("-")
     return slug or "song"
+
+
+def query_from_shazam_url(url: str | None) -> str | None:
+    if not url:
+        return None
+
+    parsed = urllib.parse.urlparse(url)
+    parts = [part for part in parsed.path.split("/") if part]
+    if not parts:
+        return None
+
+    slug = parts[-1]
+    if slug.isdigit() and len(parts) >= 2:
+        slug = parts[-2]
+
+    query = re.sub(r"[-_]+", " ", slug).strip()
+    return query or None
 
 
 def build_case(

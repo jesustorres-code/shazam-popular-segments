@@ -32,7 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
     case_subparsers = case.add_subparsers(dest="case_command", required=True)
 
     create = case_subparsers.add_parser("create", help="Create a case JSON from metadata search.")
-    create.add_argument("query", help="Song query, e.g. 'artist - title'.")
+    create.add_argument("query", nargs="?", default="", help="Song query, e.g. 'artist - title'. Optional when --shazam-url is provided.")
     create.add_argument("--provider", choices=["deezer", "itunes"], default="deezer")
     create.add_argument("--cases-dir", default="data/cases", help="Directory where case folders are created.")
     create.add_argument("--slug", help="Case folder slug. Defaults to title/artist slug.")

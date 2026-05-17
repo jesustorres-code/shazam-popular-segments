@@ -126,7 +126,7 @@ The dashboard can list generated clips, play them in-browser, and download them 
 
 The "Direct Run" tab can run the full current workflow from a song query plus the Shazam segment timestamp:
 
-1. Resolve metadata and preview audio.
+1. Resolve metadata and preview audio. If Song Query is empty, it derives a search query from the Shazam URL slug.
 2. Store the Shazam URL when provided.
 3. Create the case JSON.
 4. Extract the exact popular clip.

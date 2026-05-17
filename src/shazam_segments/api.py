@@ -31,7 +31,7 @@ class MetadataResponse(BaseModel):
 
 
 class CaseCreateRequest(BaseModel):
-    query: str
+    query: str = ""
     provider: Literal["deezer", "itunes"] = "deezer"
     casesDir: str = "data/cases"
     slug: str | None = None
@@ -49,7 +49,7 @@ class CaseExtractRequest(BaseModel):
 
 
 class RunRequest(BaseModel):
-    query: str
+    query: str = ""
     provider: Literal["deezer", "itunes"] = "deezer"
     segmentStart: str
     segmentEnd: str

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .cases import build_case, load_case, popular_segment, slugify, write_case
+from .cases import build_case, load_case, popular_segment, query_from_shazam_url, slugify, write_case
 from .extract import download_audio, extract_clip
 from .metadata import search_deezer, search_itunes
 
@@ -25,13 +25,17 @@ def create_case(
     segment_end: str | None = None,
     shazam_url: str | None = None,
 ) -> dict[str, Any]:
-    metadata = search_metadata(provider, query)
+    resolved_query = query.strip() or (query_from_shazam_url(shazam_url) or "")
+    if not resolved_query:
+        raise ValueError("query or Shazam URL is required")
+
+    metadata = search_metadata(provider, resolved_query)
     if metadata is None:
         raise ValueError("no metadata result found")
 
     case_slug = slug or slugify(f"{metadata.get('artist', '')}-{metadata.get('title', '')}")
     case_path = Path(cases_dir) / case_slug / "metadata.json"
-    data = build_case(metadata, query, segment_start=segment_start, segment_end=segment_end, shazam_url=shazam_url)
+    data = build_case(metadata, resolved_query, segment_start=segment_start, segment_end=segment_end, shazam_url=shazam_url)
     write_case(case_path, data)
     return {"case": str(case_path), "metadata": data}
 

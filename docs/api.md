@@ -55,6 +55,8 @@ curl -X POST http://127.0.0.1:8000/cases \
   }'
 ```
 
+If `query` is empty and `shazamUrl` is present, the API derives a search query from the final Shazam URL slug.
+
 ### Extract Case
 
 ```bash

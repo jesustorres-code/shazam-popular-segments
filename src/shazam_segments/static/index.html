@@ -17,6 +17,7 @@
       h1 { font-size: 28px; line-height: 1.15; margin: 0 0 6px; }
       h2 { font-size: 17px; margin: 0 0 14px; }
       p { margin: 0; color: #626773; }
+      .hint { margin-top: 6px; font-size: 12px; }
       .status { border: 1px solid #d8dbe2; border-radius: 6px; padding: 10px 12px; background: #fff; min-width: 140px; text-align: right; font-size: 14px; }
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
       section { background: #fff; border: 1px solid #d8dbe2; border-radius: 8px; padding: 16px; }
@@ -62,8 +63,8 @@
         <div class="grid">
           <section>
             <h2>Direct Run</h2>
-            <label for="directQuery">Song Query</label>
-            <input id="directQuery" value="EL DE LA TINTA Sahir Montoya holanda" />
+          <label for="directQuery">Song Query</label>
+          <input id="directQuery" placeholder="Optional when Shazam URL has a readable song slug" />
             <label for="directProvider">Provider</label>
             <select id="directProvider">
               <option value="deezer">Deezer Preview</option>
@@ -71,6 +72,7 @@
             </select>
             <label for="directShazamUrl">Shazam URL</label>
             <input id="directShazamUrl" placeholder="https://www.shazam.com/track/..." />
+            <p class="hint">If Song Query is empty, the app derives a search query from the Shazam URL slug.</p>
             <label for="directSegmentStart">Shazam Segment Start</label>
             <input id="directSegmentStart" value="00:00" />
             <label for="directSegmentEnd">Shazam Segment End</label>
