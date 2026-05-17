@@ -10,6 +10,8 @@ cache/
 build/
 dist/
 *.egg-info/
+__pycache__/
+*.py[cod]
 
 # Secrets/config
 .env
