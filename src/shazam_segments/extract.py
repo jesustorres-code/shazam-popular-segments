@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import urllib.request
 from pathlib import Path
 
 
@@ -38,3 +39,12 @@ def extract_clip(input_audio: str | Path, start: float, duration: float, output_
     if result.returncode != 0:
         details = (result.stderr or result.stdout).strip()
         raise RuntimeError(f"ffmpeg failed: {details}")
+
+
+def download_audio(url: str, output_audio: str | Path) -> Path:
+    output = Path(output_audio)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    request = urllib.request.Request(url, headers={"User-Agent": "shazam-popular-segments/0.1"})
+    with urllib.request.urlopen(request, timeout=30) as response:
+        output.write_bytes(response.read())
+    return output

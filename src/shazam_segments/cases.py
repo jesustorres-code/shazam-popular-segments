@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,47 @@ class Segment:
 def load_case(path: str | Path) -> dict[str, Any]:
     with Path(path).open("r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def write_case(path: str | Path, data: dict[str, Any]) -> None:
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
+
+
+def slugify(value: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", value.lower()).strip("-")
+    return slug or "song"
+
+
+def build_case(metadata: dict[str, Any], query: str, segment_start: str | None = None, segment_end: str | None = None) -> dict[str, Any]:
+    case: dict[str, Any] = {
+        "query": query,
+        "title": metadata.get("title"),
+        "artist": metadata.get("artist"),
+        "provider": metadata.get("provider"),
+        "durationSeconds": metadata.get("durationSeconds"),
+        "preview": metadata.get("preview"),
+    }
+    for key in ("isrc", "deezerId", "trackId", "url"):
+        if metadata.get(key) is not None:
+            case[key] = metadata[key]
+
+    if segment_start and segment_end:
+        start_seconds = parse_timecode(segment_start)
+        end_seconds = parse_timecode(segment_end)
+        if end_seconds <= start_seconds:
+            raise ValueError("segment end must be greater than start")
+        case["shazamPopularSegment"] = {
+            "start": segment_start,
+            "end": segment_end,
+            "startSeconds": start_seconds,
+            "endSeconds": end_seconds,
+        }
+
+    return case
 
 
 def popular_segment(case: dict[str, Any], video_seconds: float | None = None) -> Segment:

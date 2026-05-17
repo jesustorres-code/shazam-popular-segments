@@ -65,10 +65,10 @@ Turn the prototype into a reproducible command-line tool.
 
 Semi-automated workflow:
 
-- query song metadata
+- query song metadata (initial case create done)
 - attach screenshot
-- read or enter Popular Segment
-- generate clips
+- read or enter Popular Segment (manual timestamp entry done)
+- generate clips (initial case extract done)
 - write a report JSON
 
 ## Stage 4

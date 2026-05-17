@@ -91,6 +91,21 @@ Search metadata:
 shazam-segment metadata "EL DE LA TINTA Sahir Montoya holanda" --provider deezer
 ```
 
+Create a reusable case:
+
+```bash
+shazam-segment case create \
+  "EL DE LA TINTA Sahir Montoya holanda" \
+  --segment-start 00:00 \
+  --segment-end 00:05
+```
+
+Extract both the exact popular clip and the 7-second video clip:
+
+```bash
+shazam-segment case extract data/cases/el-de-la-tinta-holanda/metadata.json
+```
+
 ## Current Case
 
 Song: `holanda`

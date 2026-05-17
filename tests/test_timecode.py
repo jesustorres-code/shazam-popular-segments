@@ -1,6 +1,6 @@
 import unittest
 
-from shazam_segments.cases import popular_segment
+from shazam_segments.cases import build_case, popular_segment, slugify
 from shazam_segments.timecode import duration_from_range, format_seconds, parse_timecode
 
 
@@ -32,6 +32,19 @@ class TimecodeTests(unittest.TestCase):
         segment = popular_segment(case, video_seconds=7)
         self.assertEqual(segment.start, 0)
         self.assertEqual(segment.duration, 7)
+
+    def test_slugify(self):
+        self.assertEqual(slugify("EL DE LA TINTA - holanda"), "el-de-la-tinta-holanda")
+
+    def test_build_case_with_segment(self):
+        case = build_case(
+            {"provider": "deezer", "title": "holanda", "artist": "EL DE LA TINTA", "durationSeconds": 224},
+            "holanda",
+            segment_start="00:00",
+            segment_end="00:05",
+        )
+        self.assertEqual(case["shazamPopularSegment"]["startSeconds"], 0)
+        self.assertEqual(case["shazamPopularSegment"]["endSeconds"], 5)
 
 
 if __name__ == "__main__":
