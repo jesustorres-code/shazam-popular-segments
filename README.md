@@ -19,6 +19,56 @@ Given a song, produce:
 - `scripts/` - prototype scripts
 - `notes/` - working notes, logs, experiments
 
+## Install
+
+Requirements:
+
+- Linux server or workstation
+- `git`
+- `ffmpeg`
+- `bash`
+
+Clone:
+
+```bash
+git clone https://github.com/jesustorres-code/shazam-popular-segments.git
+cd shazam-popular-segments
+```
+
+Install system dependency on Ubuntu/Debian:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+```
+
+## Usage
+
+Extract a clip from a local audio file:
+
+```bash
+scripts/extract-clip.sh input.mp3 0 5 outputs/clips/example-00-05.mp3
+```
+
+Arguments:
+
+- `input.mp3` - source audio
+- `0` - start time in seconds
+- `5` - clip duration in seconds
+- `outputs/clips/example-00-05.mp3` - output file
+
+For a Shazam Popular Segment shown as `00:00 - 00:05`, use:
+
+```bash
+scripts/extract-clip.sh input.mp3 0 5 outputs/clips/song-popular-00-05.mp3
+```
+
+For a 7-second video clip starting at the same point:
+
+```bash
+scripts/extract-clip.sh input.mp3 0 7 outputs/clips/song-video-00-07.mp3
+```
+
 ## Current Case
 
 Song: `holanda`
