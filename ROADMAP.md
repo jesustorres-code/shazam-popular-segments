@@ -1,0 +1,92 @@
+# Roadmap
+
+## Current Stage
+
+Stage 1: validated prototype.
+
+The project can already:
+
+- resolve a real song case
+- store metadata
+- read a Shazam Popular Segment from a screenshot
+- extract 5s and 7s clips with `ffmpeg`
+- run from a public GitHub repository
+
+## Next Step: Stage 2
+
+Turn the prototype into a reproducible command-line tool.
+
+### Goals
+
+- Provide one clear command for clip extraction.
+- Keep metadata, inputs, and outputs organized.
+- Make installation work on another server.
+- Avoid committing generated media or copyrighted artifacts.
+
+### Tasks
+
+1. Create a proper CLI entrypoint.
+   Example:
+   ```bash
+   shazam-segment extract --audio song.mp3 --start 0 --duration 7
+   ```
+
+2. Add structured case files.
+   Example:
+   ```json
+   {
+     "title": "holanda",
+     "artists": ["EL DE LA TINTA", "Angel Cervantes", "Sahir Montoya"],
+     "isrc": "MXUM72503506",
+     "durationSeconds": 224,
+     "popularSegment": {
+       "start": "00:00",
+       "end": "00:05"
+     }
+   }
+   ```
+
+3. Add metadata lookup helpers.
+   Initial providers:
+   - Deezer
+   - iTunes Search API
+
+4. Add screenshot parsing flow.
+   First version can accept manually entered timestamps.
+   Later version should use OCR/vision.
+
+5. Add tests.
+   Cover timestamp parsing, duration math, output naming, and ffmpeg command generation.
+
+6. Improve deployment docs.
+   Include Ubuntu setup, clone, install, run, and expected output.
+
+## Stage 3
+
+Semi-automated workflow:
+
+- query song metadata
+- attach screenshot
+- read or enter Popular Segment
+- generate clips
+- write a report JSON
+
+## Stage 4
+
+Service/API:
+
+- REST API
+- job queue
+- status endpoint
+- clip download endpoint
+- Docker deployment
+
+## Immediate Recommendation
+
+Build Stage 2 first:
+
+1. CLI
+2. structured JSON cases
+3. metadata lookup
+4. cleaner clip extraction
+5. tests
