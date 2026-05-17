@@ -102,7 +102,7 @@
 
       async function loadHealth() {
         try {
-          const data = await request("/health");
+          const data = await request("health");
           show("health", data.status + " · " + data.version);
         } catch (error) {
           show("health", "offline");
@@ -111,7 +111,7 @@
 
       async function createCase() {
         try {
-          const data = await request("/cases", {
+          const data = await request("cases", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -131,7 +131,7 @@
 
       async function extractCase() {
         try {
-          const data = await request("/extract", {
+          const data = await request("extract", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -148,7 +148,7 @@
 
       async function loadCases() {
         try {
-          show("cases", await request("/cases"));
+          show("cases", await request("cases"));
         } catch (error) {
           show("cases", error.message);
         }
@@ -156,7 +156,7 @@
 
       async function loadClips() {
         try {
-          show("clips", await request("/clips"));
+          show("clips", await request("clips"));
         } catch (error) {
           show("clips", error.message);
         }
