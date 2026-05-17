@@ -24,6 +24,11 @@
       input, select { width: 100%; box-sizing: border-box; border: 1px solid #c8ccd5; border-radius: 6px; padding: 10px; font: inherit; }
       button { border: 0; border-radius: 6px; padding: 10px 13px; margin-top: 14px; background: #1167d8; color: #fff; font-weight: 700; cursor: pointer; }
       button.secondary { background: #2f3440; }
+      .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+      .tab { background: #e7eaf1; color: #252a34; }
+      .tab.active { background: #1167d8; color: #fff; }
+      .panel { display: none; }
+      .panel.active { display: block; }
       pre { min-height: 140px; overflow: auto; background: #111318; color: #eef2ff; border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.45; }
       .clip-list { display: grid; gap: 10px; }
       .clip-item { border: 1px solid #e0e3ea; border-radius: 6px; padding: 10px; }
@@ -48,6 +53,38 @@
         <div class="status" id="health">Checking...</div>
       </header>
 
+      <div class="tabs">
+        <button class="tab active" id="directTab" onclick="showPanel('direct')">Direct Run</button>
+        <button class="tab" id="advancedTab" onclick="showPanel('advanced')">Advanced</button>
+      </div>
+
+      <div class="panel active" id="directPanel">
+        <div class="grid">
+          <section>
+            <h2>Direct Run</h2>
+            <label for="directQuery">Song Query</label>
+            <input id="directQuery" value="EL DE LA TINTA Sahir Montoya holanda" />
+            <label for="directProvider">Provider</label>
+            <select id="directProvider">
+              <option value="deezer">Deezer Preview</option>
+              <option value="itunes">iTunes Preview</option>
+            </select>
+            <label for="directSegmentStart">Shazam Segment Start</label>
+            <input id="directSegmentStart" value="00:00" />
+            <label for="directSegmentEnd">Shazam Segment End</label>
+            <input id="directSegmentEnd" value="00:05" />
+            <label for="directVideoSeconds">Video Seconds</label>
+            <input id="directVideoSeconds" value="7" />
+            <button onclick="runDirect()">Run Full Process</button>
+          </section>
+          <section>
+            <h2>Direct Result</h2>
+            <pre id="directResult">Paste song and Shazam segment, then run.</pre>
+          </section>
+        </div>
+      </div>
+
+      <div class="panel" id="advancedPanel">
       <div class="grid">
         <section>
           <h2>Create Case</h2>
@@ -92,6 +129,7 @@
           <pre id="result">Ready.</pre>
         </section>
       </div>
+      </div>
     </main>
 
     <script>
@@ -104,6 +142,37 @@
 
       function show(id, data) {
         document.getElementById(id).textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+      }
+
+      function showPanel(name) {
+        document.getElementById("directPanel").classList.toggle("active", name === "direct");
+        document.getElementById("advancedPanel").classList.toggle("active", name === "advanced");
+        document.getElementById("directTab").classList.toggle("active", name === "direct");
+        document.getElementById("advancedTab").classList.toggle("active", name === "advanced");
+      }
+
+      async function runDirect() {
+        try {
+          show("directResult", "Running...");
+          const data = await request("run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: document.getElementById("directQuery").value,
+              provider: document.getElementById("directProvider").value,
+              segmentStart: document.getElementById("directSegmentStart").value,
+              segmentEnd: document.getElementById("directSegmentEnd").value,
+              videoSeconds: Number(document.getElementById("directVideoSeconds").value)
+            })
+          });
+          document.getElementById("casePath").value = data.case.case;
+          show("directResult", data);
+          show("result", data);
+          await loadCases();
+          await loadClips();
+        } catch (error) {
+          show("directResult", error.message);
+        }
       }
 
       async function loadHealth() {

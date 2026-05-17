@@ -47,6 +47,18 @@ class CaseExtractRequest(BaseModel):
     downloadDir: str = "outputs/downloads"
 
 
+class RunRequest(BaseModel):
+    query: str
+    provider: Literal["deezer", "itunes"] = "deezer"
+    segmentStart: str
+    segmentEnd: str
+    casesDir: str = "data/cases"
+    outputsDir: str = "outputs/clips"
+    downloadDir: str = "outputs/downloads"
+    slug: str | None = None
+    videoSeconds: float = Field(default=7, gt=0)
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "version": __version__}
@@ -99,6 +111,28 @@ def post_extract(request: CaseExtractRequest):
             video_seconds=request.videoSeconds,
             download_dir=request.downloadDir,
         )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/run")
+def post_run(request: RunRequest):
+    try:
+        created = create_case(
+            request.query,
+            provider=request.provider,
+            cases_dir=request.casesDir,
+            slug=request.slug,
+            segment_start=request.segmentStart,
+            segment_end=request.segmentEnd,
+        )
+        extracted = extract_case(
+            created["case"],
+            outputs_dir=request.outputsDir,
+            video_seconds=request.videoSeconds,
+            download_dir=request.downloadDir,
+        )
+        return {"case": created, "extract": extracted}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

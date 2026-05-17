@@ -66,6 +66,22 @@ curl -X POST http://127.0.0.1:8000/extract \
   }'
 ```
 
+### Run Full Process
+
+Creates the case and extracts both clips in one request. Shazam currently supplies the segment timestamp manually from the UI/screenshot.
+
+```bash
+curl -X POST http://127.0.0.1:8000/run \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": "EL DE LA TINTA Sahir Montoya holanda",
+    "provider": "deezer",
+    "segmentStart": "00:00",
+    "segmentEnd": "00:05",
+    "videoSeconds": 7
+  }'
+```
+
 ### List Clips
 
 ```bash
@@ -84,3 +100,4 @@ curl -O http://127.0.0.1:8000/clips/holanda-popular-00-05.mp3
 - Generated clips are written to local disk.
 - No authentication by design in the current product shell.
 - No queue or persistent job database yet.
+- Shazam segment lookup is not fully automated yet because Shazam blocks this VPS; paste the timestamp from Shazam for now.

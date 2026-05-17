@@ -123,6 +123,14 @@ http://127.0.0.1:8000/
 
 The dashboard can list generated clips, play them in-browser, and download them as MP3 files.
 
+The "Direct Run" tab can run the full current workflow from a song query plus the Shazam segment timestamp:
+
+1. Resolve metadata and preview audio.
+2. Create the case JSON.
+3. Extract the exact popular clip.
+4. Extract the 7-second video clip.
+5. Show playback and download controls.
+
 ## Current Case
 
 Song: `holanda`
