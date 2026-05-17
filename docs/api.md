@@ -66,6 +66,18 @@ curl -X POST http://127.0.0.1:8000/extract \
   }'
 ```
 
+### List Clips
+
+```bash
+curl http://127.0.0.1:8000/clips
+```
+
+### Download Or Preview Clip
+
+```bash
+curl -O http://127.0.0.1:8000/clips/holanda-popular-00-05.mp3
+```
+
 ## Current Limitations
 
 - Jobs are synchronous.

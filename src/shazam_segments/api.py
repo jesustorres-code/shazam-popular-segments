@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from . import __version__
@@ -106,3 +106,13 @@ def post_extract(request: CaseExtractRequest):
 @app.get("/clips")
 def get_clips(outputsDir: str = "outputs/clips"):
     return {"clips": list_clips(outputsDir)}
+
+
+@app.get("/clips/{clip_name}")
+def get_clip_file(clip_name: str, outputsDir: str = "outputs/clips"):
+    clip_path = Path(outputsDir) / clip_name
+    root = Path(outputsDir).resolve()
+    resolved = clip_path.resolve()
+    if root not in resolved.parents or not resolved.is_file():
+        raise HTTPException(status_code=404, detail="Clip not found")
+    return FileResponse(resolved, media_type="audio/mpeg", filename=resolved.name)

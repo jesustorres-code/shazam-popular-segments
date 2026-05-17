@@ -121,6 +121,8 @@ Open the dashboard:
 http://127.0.0.1:8000/
 ```
 
+The dashboard can list generated clips, play them in-browser, and download them as MP3 files.
+
 ## Current Case
 
 Song: `holanda`

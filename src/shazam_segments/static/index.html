@@ -25,6 +25,11 @@
       button { border: 0; border-radius: 6px; padding: 10px 13px; margin-top: 14px; background: #1167d8; color: #fff; font-weight: 700; cursor: pointer; }
       button.secondary { background: #2f3440; }
       pre { min-height: 140px; overflow: auto; background: #111318; color: #eef2ff; border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.45; }
+      .clip-list { display: grid; gap: 10px; }
+      .clip-item { border: 1px solid #e0e3ea; border-radius: 6px; padding: 10px; }
+      .clip-item strong { display: block; font-size: 13px; margin-bottom: 8px; overflow-wrap: anywhere; }
+      .clip-item audio { width: 100%; height: 34px; }
+      .clip-item a { display: inline-block; margin-top: 8px; color: #1167d8; font-weight: 700; text-decoration: none; }
       .full { grid-column: 1 / -1; }
       @media (max-width: 760px) {
         header, .grid { display: block; }
@@ -78,6 +83,7 @@
         <section>
           <h2>Clips</h2>
           <button class="secondary" onclick="loadClips()">Refresh Clips</button>
+          <div class="clip-list" id="clipList"></div>
           <pre id="clips">[]</pre>
         </section>
 
@@ -156,7 +162,21 @@
 
       async function loadClips() {
         try {
-          show("clips", await request("clips"));
+          const data = await request("clips");
+          show("clips", data);
+          const list = document.getElementById("clipList");
+          list.innerHTML = "";
+          for (const clip of data.clips) {
+            const item = document.createElement("div");
+            item.className = "clip-item";
+            const url = "clips/" + encodeURIComponent(clip.name);
+            item.innerHTML = "<strong></strong><audio controls preload=\"none\"></audio><a download>Download</a>";
+            item.querySelector("strong").textContent = clip.name;
+            item.querySelector("audio").src = url;
+            item.querySelector("a").href = url;
+            item.querySelector("a").textContent = "Download MP3";
+            list.appendChild(item);
+          }
         } catch (error) {
           show("clips", error.message);
         }
