@@ -96,6 +96,7 @@ Create a reusable case:
 ```bash
 shazam-segment case create \
   "EL DE LA TINTA Sahir Montoya holanda" \
+  --shazam-url "https://www.shazam.com/track/..." \
   --segment-start 00:00 \
   --segment-end 00:05
 ```
@@ -126,10 +127,11 @@ The dashboard can list generated clips, play them in-browser, and download them 
 The "Direct Run" tab can run the full current workflow from a song query plus the Shazam segment timestamp:
 
 1. Resolve metadata and preview audio.
-2. Create the case JSON.
-3. Extract the exact popular clip.
-4. Extract the 7-second video clip.
-5. Show playback and download controls.
+2. Store the Shazam URL when provided.
+3. Create the case JSON.
+4. Extract the exact popular clip.
+5. Extract the 7-second video clip.
+6. Show playback and download controls.
 
 ## Current Case
 

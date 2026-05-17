@@ -42,9 +42,11 @@ class TimecodeTests(unittest.TestCase):
             "holanda",
             segment_start="00:00",
             segment_end="00:05",
+            shazam_url="https://www.shazam.com/track/example",
         )
         self.assertEqual(case["shazamPopularSegment"]["startSeconds"], 0)
         self.assertEqual(case["shazamPopularSegment"]["endSeconds"], 5)
+        self.assertEqual(case["shazamUrl"], "https://www.shazam.com/track/example")
 
 
 if __name__ == "__main__":

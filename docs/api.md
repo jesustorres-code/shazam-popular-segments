@@ -76,6 +76,7 @@ curl -X POST http://127.0.0.1:8000/run \
   -d '{
     "query": "EL DE LA TINTA Sahir Montoya holanda",
     "provider": "deezer",
+    "shazamUrl": "https://www.shazam.com/track/...",
     "segmentStart": "00:00",
     "segmentEnd": "00:05",
     "videoSeconds": 7

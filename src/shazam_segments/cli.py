@@ -38,6 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--slug", help="Case folder slug. Defaults to title/artist slug.")
     create.add_argument("--segment-start", help="Known Shazam Popular Segment start.")
     create.add_argument("--segment-end", help="Known Shazam Popular Segment end.")
+    create.add_argument("--shazam-url", help="Optional Shazam track URL to store in the case.")
 
     case_extract = case_subparsers.add_parser("extract", help="Extract popular/video clips from a case JSON.")
     case_extract.add_argument("case", help="Case JSON path.")
@@ -96,6 +97,7 @@ def run_case_create(args: argparse.Namespace) -> int:
             slug=args.slug,
             segment_start=args.segment_start,
             segment_end=args.segment_end,
+            shazam_url=args.shazam_url,
         )
     except ValueError as exc:
         print(str(exc), file=sys.stderr)

@@ -37,6 +37,7 @@ class CaseCreateRequest(BaseModel):
     slug: str | None = None
     segmentStart: str | None = None
     segmentEnd: str | None = None
+    shazamUrl: str | None = None
 
 
 class CaseExtractRequest(BaseModel):
@@ -52,6 +53,7 @@ class RunRequest(BaseModel):
     provider: Literal["deezer", "itunes"] = "deezer"
     segmentStart: str
     segmentEnd: str
+    shazamUrl: str | None = None
     casesDir: str = "data/cases"
     outputsDir: str = "outputs/clips"
     downloadDir: str = "outputs/downloads"
@@ -91,6 +93,7 @@ def post_case(request: CaseCreateRequest):
             slug=request.slug,
             segment_start=request.segmentStart,
             segment_end=request.segmentEnd,
+            shazam_url=request.shazamUrl,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -125,6 +128,7 @@ def post_run(request: RunRequest):
             slug=request.slug,
             segment_start=request.segmentStart,
             segment_end=request.segmentEnd,
+            shazam_url=request.shazamUrl,
         )
         extracted = extract_case(
             created["case"],

@@ -33,7 +33,13 @@ def slugify(value: str) -> str:
     return slug or "song"
 
 
-def build_case(metadata: dict[str, Any], query: str, segment_start: str | None = None, segment_end: str | None = None) -> dict[str, Any]:
+def build_case(
+    metadata: dict[str, Any],
+    query: str,
+    segment_start: str | None = None,
+    segment_end: str | None = None,
+    shazam_url: str | None = None,
+) -> dict[str, Any]:
     case: dict[str, Any] = {
         "query": query,
         "title": metadata.get("title"),
@@ -45,6 +51,9 @@ def build_case(metadata: dict[str, Any], query: str, segment_start: str | None =
     for key in ("isrc", "deezerId", "trackId", "url"):
         if metadata.get(key) is not None:
             case[key] = metadata[key]
+
+    if shazam_url:
+        case["shazamUrl"] = shazam_url
 
     if segment_start and segment_end:
         start_seconds = parse_timecode(segment_start)

@@ -69,6 +69,8 @@
               <option value="deezer">Deezer Preview</option>
               <option value="itunes">iTunes Preview</option>
             </select>
+            <label for="directShazamUrl">Shazam URL</label>
+            <input id="directShazamUrl" placeholder="https://www.shazam.com/track/..." />
             <label for="directSegmentStart">Shazam Segment Start</label>
             <input id="directSegmentStart" value="00:00" />
             <label for="directSegmentEnd">Shazam Segment End</label>
@@ -160,6 +162,7 @@
             body: JSON.stringify({
               query: document.getElementById("directQuery").value,
               provider: document.getElementById("directProvider").value,
+              shazamUrl: document.getElementById("directShazamUrl").value || null,
               segmentStart: document.getElementById("directSegmentStart").value,
               segmentEnd: document.getElementById("directSegmentEnd").value,
               videoSeconds: Number(document.getElementById("directVideoSeconds").value)

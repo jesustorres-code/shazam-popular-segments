@@ -89,6 +89,7 @@ Product shell:
 - case and clip listing (initial version done)
 - create/extract actions from the browser (initial version done)
 - direct run tab for song query + Shazam timestamp (initial version done)
+- optional Shazam URL field stored with each case (initial version done)
 - authentication intentionally skipped for now
 - later: history, batch workflow, better reports, and download endpoints
 

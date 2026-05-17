@@ -23,6 +23,7 @@ def create_case(
     slug: str | None = None,
     segment_start: str | None = None,
     segment_end: str | None = None,
+    shazam_url: str | None = None,
 ) -> dict[str, Any]:
     metadata = search_metadata(provider, query)
     if metadata is None:
@@ -30,7 +31,7 @@ def create_case(
 
     case_slug = slug or slugify(f"{metadata.get('artist', '')}-{metadata.get('title', '')}")
     case_path = Path(cases_dir) / case_slug / "metadata.json"
-    data = build_case(metadata, query, segment_start=segment_start, segment_end=segment_end)
+    data = build_case(metadata, query, segment_start=segment_start, segment_end=segment_end, shazam_url=shazam_url)
     write_case(case_path, data)
     return {"case": str(case_path), "metadata": data}
 
