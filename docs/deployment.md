@@ -64,6 +64,12 @@ Check:
 curl http://127.0.0.1:8000/health
 ```
 
+Open the dashboard:
+
+```text
+http://127.0.0.1:8000/
+```
+
 ## Artifact Policy
 
 Do not commit generated clips, third-party audio, or Shazam screenshots by default. Keep the repository public and source-focused.

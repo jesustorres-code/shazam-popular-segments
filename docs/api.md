@@ -2,6 +2,8 @@
 
 Stage 4 adds a small HTTP API around the CLI workflow.
 
+Stage 5 starts a lightweight product layer with a built-in dashboard. It does not include authentication yet by design.
+
 ## Install
 
 ```bash
@@ -21,6 +23,12 @@ PYTHONPATH=src python3 -m shazam_segments.cli serve --host 127.0.0.1 --port 8000
 ```
 
 ## Endpoints
+
+### Dashboard
+
+```bash
+open http://127.0.0.1:8000/
+```
 
 ### Health
 
@@ -62,5 +70,5 @@ curl -X POST http://127.0.0.1:8000/extract \
 
 - Jobs are synchronous.
 - Generated clips are written to local disk.
-- No authentication yet.
+- No authentication by design in the current product shell.
 - No queue or persistent job database yet.

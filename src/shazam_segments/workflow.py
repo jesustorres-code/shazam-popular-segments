@@ -71,3 +71,38 @@ def extract_case(
         "popular": {"startSeconds": popular.start, "durationSeconds": popular.duration},
         "video": {"startSeconds": video.start, "durationSeconds": video.duration},
     }
+
+
+def list_cases(cases_dir: str | Path = "data/cases") -> list[dict[str, Any]]:
+    root = Path(cases_dir)
+    if not root.exists():
+        return []
+
+    cases: list[dict[str, Any]] = []
+    for metadata_path in sorted(root.glob("*/metadata.json")):
+        data = load_case(metadata_path)
+        cases.append({
+            "slug": metadata_path.parent.name,
+            "path": str(metadata_path),
+            "title": data.get("title"),
+            "artist": data.get("artist"),
+            "durationSeconds": data.get("durationSeconds"),
+            "isrc": data.get("isrc"),
+            "popularSegment": data.get("shazamPopularSegment") or data.get("popularSegment"),
+        })
+    return cases
+
+
+def list_clips(outputs_dir: str | Path = "outputs/clips") -> list[dict[str, Any]]:
+    root = Path(outputs_dir)
+    if not root.exists():
+        return []
+
+    clips: list[dict[str, Any]] = []
+    for clip_path in sorted(root.glob("*.mp3")):
+        clips.append({
+            "name": clip_path.name,
+            "path": str(clip_path),
+            "sizeBytes": clip_path.stat().st_size,
+        })
+    return clips

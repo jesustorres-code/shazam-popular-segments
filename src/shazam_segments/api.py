@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from . import __version__
-from .workflow import create_case, extract_case, search_metadata
+from .workflow import create_case, extract_case, list_cases, list_clips, search_metadata
 
 
 app = FastAPI(
@@ -50,6 +52,12 @@ def health() -> dict[str, str]:
     return {"status": "ok", "version": __version__}
 
 
+@app.get("/", response_class=HTMLResponse)
+def dashboard() -> str:
+    index_path = Path(__file__).parent / "static" / "index.html"
+    return index_path.read_text(encoding="utf-8")
+
+
 @app.get("/metadata", response_model=MetadataResponse)
 def metadata(query: str, provider: Literal["deezer", "itunes"] = "deezer"):
     try:
@@ -76,6 +84,11 @@ def post_case(request: CaseCreateRequest):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+@app.get("/cases")
+def get_cases(casesDir: str = "data/cases"):
+    return {"cases": list_cases(casesDir)}
+
+
 @app.post("/extract")
 def post_extract(request: CaseExtractRequest):
     try:
@@ -88,3 +101,8 @@ def post_extract(request: CaseExtractRequest):
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/clips")
+def get_clips(outputsDir: str = "outputs/clips"):
+    return {"clips": list_clips(outputsDir)}

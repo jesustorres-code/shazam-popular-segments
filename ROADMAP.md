@@ -81,6 +81,16 @@ Service/API:
 - clip download endpoint
 - Docker deployment
 
+## Stage 5
+
+Product shell:
+
+- web dashboard (initial version done)
+- case and clip listing (initial version done)
+- create/extract actions from the browser (initial version done)
+- authentication intentionally skipped for now
+- later: history, batch workflow, better reports, and download endpoints
+
 ## Immediate Recommendation
 
 Build Stage 2 first:

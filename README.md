@@ -115,6 +115,12 @@ shazam-segment serve --host 0.0.0.0 --port 8000
 
 See `docs/api.md` for endpoint examples.
 
+Open the dashboard:
+
+```bash
+http://127.0.0.1:8000/
+```
+
 ## Current Case
 
 Song: `holanda`

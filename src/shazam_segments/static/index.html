@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shazam Popular Segments</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f6f7f9;
+        color: #17181c;
+      }
+      body { margin: 0; }
+      main { max-width: 1120px; margin: 0 auto; padding: 32px 20px 56px; }
+      header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 28px; }
+      h1 { font-size: 28px; line-height: 1.15; margin: 0 0 6px; }
+      h2 { font-size: 17px; margin: 0 0 14px; }
+      p { margin: 0; color: #626773; }
+      .status { border: 1px solid #d8dbe2; border-radius: 6px; padding: 10px 12px; background: #fff; min-width: 140px; text-align: right; font-size: 14px; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      section { background: #fff; border: 1px solid #d8dbe2; border-radius: 8px; padding: 16px; }
+      label { display: block; font-size: 13px; font-weight: 650; margin: 12px 0 6px; }
+      input, select { width: 100%; box-sizing: border-box; border: 1px solid #c8ccd5; border-radius: 6px; padding: 10px; font: inherit; }
+      button { border: 0; border-radius: 6px; padding: 10px 13px; margin-top: 14px; background: #1167d8; color: #fff; font-weight: 700; cursor: pointer; }
+      button.secondary { background: #2f3440; }
+      pre { min-height: 140px; overflow: auto; background: #111318; color: #eef2ff; border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.45; }
+      .full { grid-column: 1 / -1; }
+      @media (max-width: 760px) {
+        header, .grid { display: block; }
+        .status { text-align: left; margin-top: 14px; }
+        section { margin-bottom: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Shazam Popular Segments</h1>
+          <p>Create song cases, extract popular clips, and inspect generated outputs.</p>
+        </div>
+        <div class="status" id="health">Checking...</div>
+      </header>
+
+      <div class="grid">
+        <section>
+          <h2>Create Case</h2>
+          <label for="query">Song Query</label>
+          <input id="query" value="EL DE LA TINTA Sahir Montoya holanda" />
+          <label for="provider">Provider</label>
+          <select id="provider">
+            <option value="deezer">Deezer</option>
+            <option value="itunes">iTunes</option>
+          </select>
+          <label for="segmentStart">Segment Start</label>
+          <input id="segmentStart" value="00:00" />
+          <label for="segmentEnd">Segment End</label>
+          <input id="segmentEnd" value="00:05" />
+          <button onclick="createCase()">Create Case</button>
+        </section>
+
+        <section>
+          <h2>Extract Case</h2>
+          <label for="casePath">Case Path</label>
+          <input id="casePath" value="data/cases/el-de-la-tinta-holanda/metadata.json" />
+          <label for="videoSeconds">Video Seconds</label>
+          <input id="videoSeconds" value="7" />
+          <button onclick="extractCase()">Extract Clips</button>
+        </section>
+
+        <section>
+          <h2>Cases</h2>
+          <button class="secondary" onclick="loadCases()">Refresh Cases</button>
+          <pre id="cases">[]</pre>
+        </section>
+
+        <section>
+          <h2>Clips</h2>
+          <button class="secondary" onclick="loadClips()">Refresh Clips</button>
+          <pre id="clips">[]</pre>
+        </section>
+
+        <section class="full">
+          <h2>Result</h2>
+          <pre id="result">Ready.</pre>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      async function request(path, options) {
+        const response = await fetch(path, options);
+        const data = await response.json();
+        if (!response.ok) throw new Error(JSON.stringify(data, null, 2));
+        return data;
+      }
+
+      function show(id, data) {
+        document.getElementById(id).textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+      }
+
+      async function loadHealth() {
+        try {
+          const data = await request("/health");
+          show("health", data.status + " · " + data.version);
+        } catch (error) {
+          show("health", "offline");
+        }
+      }
+
+      async function createCase() {
+        try {
+          const data = await request("/cases", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: document.getElementById("query").value,
+              provider: document.getElementById("provider").value,
+              segmentStart: document.getElementById("segmentStart").value,
+              segmentEnd: document.getElementById("segmentEnd").value
+            })
+          });
+          document.getElementById("casePath").value = data.case;
+          show("result", data);
+          await loadCases();
+        } catch (error) {
+          show("result", error.message);
+        }
+      }
+
+      async function extractCase() {
+        try {
+          const data = await request("/extract", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              casePath: document.getElementById("casePath").value,
+              videoSeconds: Number(document.getElementById("videoSeconds").value)
+            })
+          });
+          show("result", data);
+          await loadClips();
+        } catch (error) {
+          show("result", error.message);
+        }
+      }
+
+      async function loadCases() {
+        try {
+          show("cases", await request("/cases"));
+        } catch (error) {
+          show("cases", error.message);
+        }
+      }
+
+      async function loadClips() {
+        try {
+          show("clips", await request("/clips"));
+        } catch (error) {
+          show("clips", error.message);
+        }
+      }
+
+      loadHealth();
+      loadCases();
+      loadClips();
+    </script>
+  </body>
+</html>

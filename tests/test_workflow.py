@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from shazam_segments.workflow import extract_case
+from shazam_segments.workflow import extract_case, list_cases, list_clips
 
 
 class WorkflowTests(unittest.TestCase):
@@ -17,6 +17,14 @@ class WorkflowTests(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 extract_case(case_path)
+
+    def test_list_cases_empty_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            self.assertEqual(list_cases(Path(temp) / "missing"), [])
+
+    def test_list_clips_empty_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            self.assertEqual(list_clips(Path(temp) / "missing"), [])
 
 
 if __name__ == "__main__":
