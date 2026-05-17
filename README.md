@@ -106,6 +106,15 @@ Extract both the exact popular clip and the 7-second video clip:
 shazam-segment case extract data/cases/el-de-la-tinta-holanda/metadata.json
 ```
 
+Run the HTTP API:
+
+```bash
+python3 -m pip install --user '.[api]'
+shazam-segment serve --host 0.0.0.0 --port 8000
+```
+
+See `docs/api.md` for endpoint examples.
+
 ## Current Case
 
 Song: `holanda`

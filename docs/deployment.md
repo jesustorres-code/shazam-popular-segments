@@ -44,6 +44,26 @@ Current workflow:
 3. Extract the matching clip with `scripts/extract-clip.sh`.
 4. Store generated clips in `outputs/clips/`.
 
+## API Mode
+
+Install API dependencies:
+
+```bash
+python3 -m pip install --user '.[api]'
+```
+
+Run:
+
+```bash
+shazam-segment serve --host 0.0.0.0 --port 8000
+```
+
+Check:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
 ## Artifact Policy
 
 Do not commit generated clips, third-party audio, or Shazam screenshots by default. Keep the repository public and source-focused.

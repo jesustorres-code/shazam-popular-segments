@@ -75,7 +75,7 @@ Semi-automated workflow:
 
 Service/API:
 
-- REST API
+- REST API (initial synchronous FastAPI service done)
 - job queue
 - status endpoint
 - clip download endpoint

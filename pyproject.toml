@@ -13,6 +13,9 @@ license = { text = "MIT" }
 [project.scripts]
 shazam-segment = "shazam_segments.cli:main"
 
+[project.optional-dependencies]
+api = ["fastapi>=0.110", "uvicorn>=0.27"]
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 

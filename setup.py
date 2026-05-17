@@ -13,4 +13,7 @@ setup(
             "shazam-segment=shazam_segments.cli:main",
         ]
     },
+    extras_require={
+        "api": ["fastapi>=0.110", "uvicorn>=0.27"],
+    },
 )

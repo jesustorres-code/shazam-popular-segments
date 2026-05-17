@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+from typing import Literal
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+from . import __version__
+from .workflow import create_case, extract_case, search_metadata
+
+
+app = FastAPI(
+    title="Shazam Popular Segments API",
+    version=__version__,
+    description="API for resolving song metadata and extracting Shazam Popular Segment clips.",
+)
+
+
+class MetadataResponse(BaseModel):
+    provider: str
+    title: str | None = None
+    artist: str | None = None
+    durationSeconds: int | None = None
+    isrc: str | None = None
+    preview: str | None = None
+    deezerId: int | None = None
+    trackId: int | None = None
+    url: str | None = None
+
+
+class CaseCreateRequest(BaseModel):
+    query: str
+    provider: Literal["deezer", "itunes"] = "deezer"
+    casesDir: str = "data/cases"
+    slug: str | None = None
+    segmentStart: str | None = None
+    segmentEnd: str | None = None
+
+
+class CaseExtractRequest(BaseModel):
+    casePath: str
+    audio: str | None = None
+    outputsDir: str = "outputs/clips"
+    videoSeconds: float = Field(default=7, gt=0)
+    downloadDir: str = "outputs/downloads"
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok", "version": __version__}
+
+
+@app.get("/metadata", response_model=MetadataResponse)
+def metadata(query: str, provider: Literal["deezer", "itunes"] = "deezer"):
+    try:
+        result = search_metadata(provider, query)
+    except Exception as exc:  # pragma: no cover - defensive API wrapper
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    if result is None:
+        raise HTTPException(status_code=404, detail="No result found")
+    return result
+
+
+@app.post("/cases")
+def post_case(request: CaseCreateRequest):
+    try:
+        return create_case(
+            request.query,
+            provider=request.provider,
+            cases_dir=request.casesDir,
+            slug=request.slug,
+            segment_start=request.segmentStart,
+            segment_end=request.segmentEnd,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/extract")
+def post_extract(request: CaseExtractRequest):
+    try:
+        return extract_case(
+            request.casePath,
+            audio=request.audio,
+            outputs_dir=request.outputsDir,
+            video_seconds=request.videoSeconds,
+            download_dir=request.downloadDir,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
