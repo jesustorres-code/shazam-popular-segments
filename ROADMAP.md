@@ -90,6 +90,7 @@ Product shell:
 - create/extract actions from the browser (initial version done)
 - direct run tab for song query + Shazam timestamp (initial version done)
 - optional Shazam URL field stored with each case (initial version done)
+- screenshot input for Shazam Popular Segment: read the segment from the top-right area of the capture, then fill Segment Start/End automatically
 - authentication intentionally skipped for now
 - later: history, batch workflow, better reports, and download endpoints
 
