@@ -90,6 +90,11 @@
             <h2>Direct Result</h2>
             <pre id="directResult">Paste song and Shazam segment, then run.</pre>
           </section>
+          <section class="full">
+            <h2>Generated Segments</h2>
+            <div class="clip-list" id="directClipList"></div>
+            <p class="hint" id="directClipHint">Run the full process to preview and download the generated MP3 segments.</p>
+          </section>
         </div>
       </div>
 
@@ -167,6 +172,39 @@
         if (parts.length === 2) return parts[0] * 60 + parts[1];
         if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
         return NaN;
+      }
+
+      function clipUrl(name) {
+        return "clips/" + encodeURIComponent(name);
+      }
+
+      function clipNameFromPath(path) {
+        return String(path || "").split(/[\\/]/).pop();
+      }
+
+      function renderClipList(targetId, clips) {
+        const list = document.getElementById(targetId);
+        list.innerHTML = "";
+        for (const clip of clips) {
+          const name = clip.name || clipNameFromPath(clip.path);
+          if (!name) continue;
+          const item = document.createElement("div");
+          item.className = "clip-item";
+          const url = clipUrl(name);
+          item.innerHTML = "<strong></strong><audio controls preload=\"none\"></audio><a download>Download</a>";
+          item.querySelector("strong").textContent = name;
+          item.querySelector("audio").src = url;
+          item.querySelector("a").href = url;
+          item.querySelector("a").textContent = "Download MP3";
+          list.appendChild(item);
+        }
+      }
+
+      function clipsFromExtract(extract) {
+        return [
+          { path: extract && extract.popularClip },
+          { path: extract && extract.videoClip }
+        ].filter((clip) => clip.path);
       }
 
       async function resolveDirect() {
@@ -251,6 +289,11 @@
             })
           });
           document.getElementById("casePath").value = data.case.case;
+          const generatedClips = clipsFromExtract(data.extract);
+          renderClipList("directClipList", generatedClips);
+          document.getElementById("directClipHint").textContent = generatedClips.length
+            ? "Generated clips are ready to preview or download."
+            : "No clips were returned by the run.";
           show("directResult", data);
           show("result", data);
           await loadCases();
@@ -318,19 +361,7 @@
         try {
           const data = await request("clips");
           show("clips", data);
-          const list = document.getElementById("clipList");
-          list.innerHTML = "";
-          for (const clip of data.clips) {
-            const item = document.createElement("div");
-            item.className = "clip-item";
-            const url = "clips/" + encodeURIComponent(clip.name);
-            item.innerHTML = "<strong></strong><audio controls preload=\"none\"></audio><a download>Download</a>";
-            item.querySelector("strong").textContent = clip.name;
-            item.querySelector("audio").src = url;
-            item.querySelector("a").href = url;
-            item.querySelector("a").textContent = "Download MP3";
-            list.appendChild(item);
-          }
+          renderClipList("clipList", data.clips);
         } catch (error) {
           show("clips", error.message);
         }
