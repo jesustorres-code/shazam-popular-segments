@@ -72,13 +72,14 @@
             </select>
             <label for="directShazamUrl">Shazam URL</label>
             <input id="directShazamUrl" placeholder="https://www.shazam.com/track/..." />
-            <p class="hint">If Song Query is empty, the app derives a search query from the Shazam URL slug.</p>
+            <p class="hint">Use Find Song first. If Song Query is empty, the app derives a search query from the Shazam URL slug.</p>
             <label for="directSegmentStart">Shazam Segment Start</label>
             <input id="directSegmentStart" value="00:00" />
             <label for="directSegmentEnd">Shazam Segment End</label>
-            <input id="directSegmentEnd" value="00:05" />
+            <input id="directSegmentEnd" value="00:00" />
             <label for="directVideoSeconds">Video Seconds</label>
-            <input id="directVideoSeconds" value="7" />
+            <input id="directVideoSeconds" value="0" />
+            <button class="secondary" onclick="resolveDirect()">Find Song</button>
             <button onclick="runDirect()">Run Full Process</button>
           </section>
           <section>
@@ -155,8 +156,53 @@
         document.getElementById("advancedTab").classList.toggle("active", name === "advanced");
       }
 
+      function parseTimecode(value) {
+        const parts = String(value || "").trim().split(":").map(Number);
+        if (parts.some((part) => !Number.isFinite(part) || part < 0)) return NaN;
+        if (parts.length === 1) return parts[0];
+        if (parts.length === 2) return parts[0] * 60 + parts[1];
+        if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        return NaN;
+      }
+
+      async function resolveDirect() {
+        try {
+          show("directResult", "Finding song...");
+          const data = await request("resolve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: document.getElementById("directQuery").value,
+              provider: document.getElementById("directProvider").value,
+              shazamUrl: document.getElementById("directShazamUrl").value || null
+            })
+          });
+          document.getElementById("directQuery").value = data.query;
+          show("directResult", {
+            query: data.query,
+            metadata: data.metadata,
+            nextStep: "Set Shazam Segment Start/End from the Popular Segment, then run the full process."
+          });
+        } catch (error) {
+          show("directResult", error.message);
+        }
+      }
+
       async function runDirect() {
         try {
+          const segmentStart = document.getElementById("directSegmentStart").value;
+          const segmentEnd = document.getElementById("directSegmentEnd").value;
+          const startSeconds = parseTimecode(segmentStart);
+          const endSeconds = parseTimecode(segmentEnd);
+          const videoSeconds = Number(document.getElementById("directVideoSeconds").value);
+          if (!Number.isFinite(startSeconds) || !Number.isFinite(endSeconds) || endSeconds <= startSeconds) {
+            show("directResult", "Set a real Shazam segment before running. Defaults stay at 00:00-00:00 so URL-only searches do not create a fake clip.");
+            return;
+          }
+          if (!Number.isFinite(videoSeconds) || videoSeconds <= 0) {
+            show("directResult", "Set Video Seconds above 0 before running.");
+            return;
+          }
           show("directResult", "Running...");
           const data = await request("run", {
             method: "POST",
@@ -165,9 +211,9 @@
               query: document.getElementById("directQuery").value,
               provider: document.getElementById("directProvider").value,
               shazamUrl: document.getElementById("directShazamUrl").value || null,
-              segmentStart: document.getElementById("directSegmentStart").value,
-              segmentEnd: document.getElementById("directSegmentEnd").value,
-              videoSeconds: Number(document.getElementById("directVideoSeconds").value)
+              segmentStart: segmentStart,
+              segmentEnd: segmentEnd,
+              videoSeconds: videoSeconds
             })
           });
           document.getElementById("casePath").value = data.case.case;

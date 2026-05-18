@@ -42,6 +42,20 @@ curl http://127.0.0.1:8000/health
 curl 'http://127.0.0.1:8000/metadata?query=EL%20DE%20LA%20TINTA%20Sahir%20Montoya%20holanda&provider=deezer'
 ```
 
+### Resolve
+
+Derives a query from a Shazam URL when `query` is empty, then resolves provider metadata. This does not extract clips and does not invent a Shazam Popular Segment.
+
+```bash
+curl -X POST http://127.0.0.1:8000/resolve \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": "",
+    "provider": "deezer",
+    "shazamUrl": "https://www.shazam.com/song/1471572221/smack-that-feat-eminem"
+  }'
+```
+
 ### Create Case
 
 ```bash

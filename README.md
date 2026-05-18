@@ -124,14 +124,12 @@ http://127.0.0.1:8000/
 
 The dashboard can list generated clips, play them in-browser, and download them as MP3 files.
 
-The "Direct Run" tab can run the full current workflow from a song query plus the Shazam segment timestamp:
+The "Direct Run" tab separates URL lookup from clip extraction:
 
-1. Resolve metadata and preview audio. If Song Query is empty, it derives a search query from the Shazam URL slug.
-2. Store the Shazam URL when provided.
-3. Create the case JSON.
-4. Extract the exact popular clip.
-5. Extract the 7-second video clip.
-6. Show playback and download controls.
+1. Use "Find Song" with a song query or Shazam URL. If Song Query is empty, it derives a search query from the Shazam URL slug.
+2. Keep Shazam Segment Start/End and Video Seconds at zero until a real Popular Segment timestamp is available.
+3. Use "Run Full Process" only after setting a real Shazam Segment Start/End and video duration.
+4. Store the Shazam URL when provided, create the case JSON, extract clips, and show playback/download controls.
 
 ## Current Case
 
