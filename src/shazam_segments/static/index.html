@@ -73,6 +73,9 @@
             <label for="directShazamUrl">Shazam URL</label>
             <input id="directShazamUrl" placeholder="https://www.shazam.com/track/..." />
             <p class="hint">Use Find Song first. If Song Query is empty, the app derives a search query from the Shazam URL slug.</p>
+            <label for="directScreenshot">Shazam Screenshot</label>
+            <input id="directScreenshot" type="file" accept="image/*" />
+            <p class="hint">Upload the Shazam capture with the Popular Segment visible in the top-right area.</p>
             <label for="directSegmentStart">Shazam Segment Start</label>
             <input id="directSegmentStart" value="00:00" />
             <label for="directSegmentEnd">Shazam Segment End</label>
@@ -80,6 +83,7 @@
             <label for="directVideoSeconds">Video Seconds</label>
             <input id="directVideoSeconds" value="0" />
             <button class="secondary" onclick="resolveDirect()">Find Song</button>
+            <button class="secondary" onclick="readSegmentScreenshot()">Read Segment</button>
             <button onclick="runDirect()">Run Full Process</button>
           </section>
           <section>
@@ -182,6 +186,36 @@
             query: data.query,
             metadata: data.metadata,
             nextStep: "Set Shazam Segment Start/End from the Popular Segment, then run the full process."
+          });
+        } catch (error) {
+          show("directResult", error.message);
+        }
+      }
+
+      async function readSegmentScreenshot() {
+        const input = document.getElementById("directScreenshot");
+        const file = input.files && input.files[0];
+        if (!file) {
+          show("directResult", "Choose a Shazam screenshot first.");
+          return;
+        }
+        try {
+          show("directResult", "Reading segment from screenshot...");
+          const form = new FormData();
+          form.append("file", file);
+          const data = await request("segment-from-screenshot", {
+            method: "POST",
+            body: form
+          });
+          document.getElementById("directSegmentStart").value = data.start;
+          document.getElementById("directSegmentEnd").value = data.end;
+          if (Number(document.getElementById("directVideoSeconds").value) <= 0) {
+            document.getElementById("directVideoSeconds").value = "7";
+          }
+          show("directResult", {
+            segment: { start: data.start, end: data.end, durationSeconds: data.durationSeconds },
+            ocrText: data.text,
+            nextStep: "Run Full Process to download the preview and extract clips."
           });
         } catch (error) {
           show("directResult", error.message);

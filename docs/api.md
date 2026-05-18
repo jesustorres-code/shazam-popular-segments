@@ -56,6 +56,15 @@ curl -X POST http://127.0.0.1:8000/resolve \
   }'
 ```
 
+### Segment From Screenshot
+
+Reads the Shazam Popular Segment from the top-right area of a screenshot.
+
+```bash
+curl -X POST http://127.0.0.1:8000/segment-from-screenshot \
+  -F 'file=@shazam-screenshot.png'
+```
+
 ### Create Case
 
 ```bash

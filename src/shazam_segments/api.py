@@ -3,11 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from . import __version__
+from .screenshot import read_segment_from_screenshot
 from .workflow import create_case, extract_case, list_cases, list_clips, resolve_metadata, search_metadata
 
 
@@ -98,6 +99,20 @@ def post_resolve(request: ResolveRequest):
     except Exception as exc:  # pragma: no cover - defensive API wrapper
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     return {"query": resolved_query, "metadata": result}
+
+
+@app.post("/segment-from-screenshot")
+async def post_segment_from_screenshot(file: UploadFile = File(...)):
+    content_type = file.content_type or ""
+    if content_type and not content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="file must be an image")
+    try:
+        content = await file.read()
+        return read_segment_from_screenshot(content)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - defensive API wrapper
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.post("/cases")

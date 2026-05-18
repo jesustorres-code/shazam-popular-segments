@@ -127,9 +127,10 @@ The dashboard can list generated clips, play them in-browser, and download them 
 The "Direct Run" tab separates URL lookup from clip extraction:
 
 1. Use "Find Song" with a song query or Shazam URL. If Song Query is empty, it derives a search query from the Shazam URL slug.
-2. Keep Shazam Segment Start/End and Video Seconds at zero until a real Popular Segment timestamp is available.
-3. Use "Run Full Process" only after setting a real Shazam Segment Start/End and video duration.
-4. Store the Shazam URL when provided, create the case JSON, extract clips, and show playback/download controls.
+2. Upload a Shazam screenshot and use "Read Segment" to OCR the Popular Segment from the top-right area.
+3. Keep Shazam Segment Start/End and Video Seconds at zero until a real Popular Segment timestamp is available.
+4. Use "Run Full Process" only after setting a real Shazam Segment Start/End and video duration.
+5. Store the Shazam URL when provided, create the case JSON, extract clips, and show playback/download controls.
 
 ## Current Case
 
