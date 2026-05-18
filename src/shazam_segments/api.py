@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from . import __version__
+from .metadata import resolve_youtube_music_url
 from .screenshot import read_segment_from_screenshot
 from .workflow import create_case, extract_case, list_cases, list_clips, resolve_metadata, search_metadata
 
@@ -68,6 +69,11 @@ class ResolveRequest(BaseModel):
     shazamUrl: str | None = None
 
 
+class YoutubeMusicResolveRequest(BaseModel):
+    url: str
+    provider: Literal["deezer", "itunes"] = "deezer"
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "version": __version__}
@@ -99,6 +105,18 @@ def post_resolve(request: ResolveRequest):
     except Exception as exc:  # pragma: no cover - defensive API wrapper
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     return {"query": resolved_query, "metadata": result}
+
+
+@app.post("/youtube-music/resolve")
+def post_youtube_music_resolve(request: YoutubeMusicResolveRequest):
+    try:
+        youtube = resolve_youtube_music_url(request.url)
+        resolved_query, result = resolve_metadata(request.provider, youtube["query"])
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - defensive API wrapper
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"youtube": youtube, "query": resolved_query, "metadata": result}
 
 
 @app.post("/segment-from-screenshot")

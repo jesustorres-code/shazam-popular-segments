@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import urllib.parse
 import urllib.request
 from typing import Any
@@ -46,6 +47,44 @@ def search_itunes(query: str) -> dict[str, Any] | None:
         "durationSeconds": round(millis / 1000) if isinstance(millis, int) else None,
         "preview": track.get("previewUrl"),
         "url": track.get("trackViewUrl"),
+    }
+
+
+def compose_youtube_music_query(title: str | None, author: str | None) -> str:
+    clean_title = re.sub(r"\s+", " ", title or "").strip()
+    clean_title = re.sub(
+        r"\s*[\[(](official\s+)?(music\s+)?(video|audio|lyric video|visualizer)[\])]",
+        "",
+        clean_title,
+        flags=re.IGNORECASE,
+    ).strip()
+    clean_author = re.sub(r"\s+-\s+Topic$", "", author or "", flags=re.IGNORECASE).strip()
+    if clean_author:
+        clean_title = re.sub(
+            rf"^{re.escape(clean_author)}\s+[-–—]\s+",
+            "",
+            clean_title,
+            flags=re.IGNORECASE,
+        ).strip()
+    return " ".join(part for part in (clean_author, clean_title) if part).strip()
+
+
+def resolve_youtube_music_url(url: str) -> dict[str, Any]:
+    if not url.strip():
+        raise ValueError("YouTube Music URL is required")
+
+    encoded = urllib.parse.quote(url, safe="")
+    data = _fetch_json(f"https://www.youtube.com/oembed?format=json&url={encoded}")
+    title = data.get("title")
+    author = data.get("author_name")
+    query = compose_youtube_music_query(title, author)
+    if not query:
+        raise ValueError("could not derive a song query from the YouTube Music URL")
+    return {
+        "url": url,
+        "title": title,
+        "author": author,
+        "query": query,
     }
 
 

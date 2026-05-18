@@ -56,6 +56,7 @@
 
       <div class="tabs">
         <button class="tab active" id="directTab" onclick="showPanel('direct')">Direct Run</button>
+        <button class="tab" id="youtubeTab" onclick="showPanel('youtube')">YouTube Music</button>
         <button class="tab" id="advancedTab" onclick="showPanel('advanced')">Advanced</button>
       </div>
 
@@ -94,6 +95,46 @@
             <h2>Generated Segments</h2>
             <div class="clip-list" id="directClipList"></div>
             <p class="hint" id="directClipHint">Run the full process to preview and download the generated MP3 segments.</p>
+          </section>
+        </div>
+      </div>
+
+      <div class="panel" id="youtubePanel">
+        <div class="grid">
+          <section>
+            <h2>YouTube Music</h2>
+            <label for="youtubeUrl">YouTube Music URL</label>
+            <input id="youtubeUrl" placeholder="https://music.youtube.com/watch?v=..." />
+            <label for="youtubeProvider">Provider</label>
+            <select id="youtubeProvider">
+              <option value="deezer">Deezer Preview</option>
+              <option value="itunes">iTunes Preview</option>
+            </select>
+            <label for="youtubeQuery">Resolved Song Query</label>
+            <input id="youtubeQuery" placeholder="Filled from YouTube Music" />
+            <label for="youtubeShazamUrl">Shazam URL</label>
+            <input id="youtubeShazamUrl" placeholder="Optional Shazam URL for case history" />
+            <label for="youtubeScreenshot">Shazam Screenshot</label>
+            <input id="youtubeScreenshot" type="file" accept="image/*" />
+            <p class="hint">Paste YouTube Music first, then use a Shazam screenshot to read the Popular Segment.</p>
+            <label for="youtubeSegmentStart">Shazam Segment Start</label>
+            <input id="youtubeSegmentStart" value="00:00" />
+            <label for="youtubeSegmentEnd">Shazam Segment End</label>
+            <input id="youtubeSegmentEnd" value="00:00" />
+            <label for="youtubeVideoSeconds">Video Seconds</label>
+            <input id="youtubeVideoSeconds" value="0" />
+            <button class="secondary" onclick="resolveYoutube()">Find Song</button>
+            <button class="secondary" onclick="readYoutubeSegmentScreenshot()">Read Segment</button>
+            <button onclick="runYoutube()">Run Full Process</button>
+          </section>
+          <section>
+            <h2>YouTube Result</h2>
+            <pre id="youtubeResult">Paste YouTube Music URL, then find song.</pre>
+          </section>
+          <section class="full">
+            <h2>Generated Segments</h2>
+            <div class="clip-list" id="youtubeClipList"></div>
+            <p class="hint" id="youtubeClipHint">Run the full process to preview and download the generated MP3 segments.</p>
           </section>
         </div>
       </div>
@@ -160,8 +201,10 @@
 
       function showPanel(name) {
         document.getElementById("directPanel").classList.toggle("active", name === "direct");
+        document.getElementById("youtubePanel").classList.toggle("active", name === "youtube");
         document.getElementById("advancedPanel").classList.toggle("active", name === "advanced");
         document.getElementById("directTab").classList.toggle("active", name === "direct");
+        document.getElementById("youtubeTab").classList.toggle("active", name === "youtube");
         document.getElementById("advancedTab").classList.toggle("active", name === "advanced");
       }
 
@@ -207,6 +250,89 @@
         ].filter((clip) => clip.path);
       }
 
+      function validateRunFields(resultId, segmentStart, segmentEnd, videoSeconds) {
+        const startSeconds = parseTimecode(segmentStart);
+        const endSeconds = parseTimecode(segmentEnd);
+        if (!Number.isFinite(startSeconds) || !Number.isFinite(endSeconds) || endSeconds <= startSeconds) {
+          show(resultId, "Set a real Shazam segment before running. Defaults stay at 00:00-00:00 so URL-only searches do not create a fake clip.");
+          return false;
+        }
+        if (!Number.isFinite(videoSeconds) || videoSeconds <= 0) {
+          show(resultId, "Set Video Seconds above 0 before running.");
+          return false;
+        }
+        return true;
+      }
+
+      async function readSegmentScreenshotFor(inputId, startId, endId, videoId, resultId) {
+        const input = document.getElementById(inputId);
+        const file = input.files && input.files[0];
+        if (!file) {
+          show(resultId, "Choose a Shazam screenshot first.");
+          return;
+        }
+        try {
+          show(resultId, "Reading segment from screenshot...");
+          const form = new FormData();
+          form.append("file", file);
+          const data = await request("segment-from-screenshot", {
+            method: "POST",
+            body: form
+          });
+          document.getElementById(startId).value = data.start;
+          document.getElementById(endId).value = data.end;
+          if (Number(document.getElementById(videoId).value) <= 0) {
+            document.getElementById(videoId).value = "7";
+          }
+          show(resultId, {
+            segment: { start: data.start, end: data.end, durationSeconds: data.durationSeconds },
+            ocrText: data.text,
+            nextStep: "Run Full Process to download the preview and extract clips."
+          });
+        } catch (error) {
+          show(resultId, error.message);
+        }
+      }
+
+      async function runFullProcess(fields) {
+        const segmentStart = document.getElementById(fields.startId).value;
+        const segmentEnd = document.getElementById(fields.endId).value;
+        const videoSeconds = Number(document.getElementById(fields.videoId).value);
+        if (!validateRunFields(fields.resultId, segmentStart, segmentEnd, videoSeconds)) return;
+
+        try {
+          renderClipList(fields.clipListId, []);
+          document.getElementById(fields.clipHintId).textContent = "Running full process...";
+          show(fields.resultId, "Running...");
+          const data = await request("run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: document.getElementById(fields.queryId).value,
+              provider: document.getElementById(fields.providerId).value,
+              shazamUrl: document.getElementById(fields.shazamUrlId).value || null,
+              segmentStart: segmentStart,
+              segmentEnd: segmentEnd,
+              videoSeconds: videoSeconds
+            })
+          });
+          document.getElementById("casePath").value = data.case.case;
+          const generatedClips = clipsFromExtract(data.extract);
+          renderClipList(fields.clipListId, generatedClips);
+          document.getElementById(fields.clipHintId).textContent = generatedClips.length
+            ? "Generated clips are ready to preview or download."
+            : "No clips were returned by the run.";
+          show(fields.resultId, data);
+          show("result", data);
+          await loadCases();
+          await loadClips();
+        } catch (error) {
+          renderClipList(fields.clipListId, []);
+          document.getElementById(fields.clipHintId).textContent = "No valid clips were generated for this run.";
+          show(fields.resultId, error.message);
+        }
+      }
+
       async function resolveDirect() {
         try {
           show("directResult", "Finding song...");
@@ -231,80 +357,62 @@
       }
 
       async function readSegmentScreenshot() {
-        const input = document.getElementById("directScreenshot");
-        const file = input.files && input.files[0];
-        if (!file) {
-          show("directResult", "Choose a Shazam screenshot first.");
-          return;
-        }
-        try {
-          show("directResult", "Reading segment from screenshot...");
-          const form = new FormData();
-          form.append("file", file);
-          const data = await request("segment-from-screenshot", {
-            method: "POST",
-            body: form
-          });
-          document.getElementById("directSegmentStart").value = data.start;
-          document.getElementById("directSegmentEnd").value = data.end;
-          if (Number(document.getElementById("directVideoSeconds").value) <= 0) {
-            document.getElementById("directVideoSeconds").value = "7";
-          }
-          show("directResult", {
-            segment: { start: data.start, end: data.end, durationSeconds: data.durationSeconds },
-            ocrText: data.text,
-            nextStep: "Run Full Process to download the preview and extract clips."
-          });
-        } catch (error) {
-          show("directResult", error.message);
-        }
+        await readSegmentScreenshotFor("directScreenshot", "directSegmentStart", "directSegmentEnd", "directVideoSeconds", "directResult");
       }
 
       async function runDirect() {
+        await runFullProcess({
+          queryId: "directQuery",
+          providerId: "directProvider",
+          shazamUrlId: "directShazamUrl",
+          startId: "directSegmentStart",
+          endId: "directSegmentEnd",
+          videoId: "directVideoSeconds",
+          resultId: "directResult",
+          clipListId: "directClipList",
+          clipHintId: "directClipHint"
+        });
+      }
+
+      async function resolveYoutube() {
         try {
-          const segmentStart = document.getElementById("directSegmentStart").value;
-          const segmentEnd = document.getElementById("directSegmentEnd").value;
-          const startSeconds = parseTimecode(segmentStart);
-          const endSeconds = parseTimecode(segmentEnd);
-          const videoSeconds = Number(document.getElementById("directVideoSeconds").value);
-          if (!Number.isFinite(startSeconds) || !Number.isFinite(endSeconds) || endSeconds <= startSeconds) {
-            show("directResult", "Set a real Shazam segment before running. Defaults stay at 00:00-00:00 so URL-only searches do not create a fake clip.");
-            return;
-          }
-          if (!Number.isFinite(videoSeconds) || videoSeconds <= 0) {
-            show("directResult", "Set Video Seconds above 0 before running.");
-            return;
-          }
-          renderClipList("directClipList", []);
-          document.getElementById("directClipHint").textContent = "Running full process...";
-          show("directResult", "Running...");
-          const data = await request("run", {
+          show("youtubeResult", "Finding YouTube Music song...");
+          const data = await request("youtube-music/resolve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              query: document.getElementById("directQuery").value,
-              provider: document.getElementById("directProvider").value,
-              shazamUrl: document.getElementById("directShazamUrl").value || null,
-              segmentStart: segmentStart,
-              segmentEnd: segmentEnd,
-              videoSeconds: videoSeconds
+              url: document.getElementById("youtubeUrl").value,
+              provider: document.getElementById("youtubeProvider").value
             })
           });
-          document.getElementById("casePath").value = data.case.case;
-          const generatedClips = clipsFromExtract(data.extract);
-          renderClipList("directClipList", generatedClips);
-          document.getElementById("directClipHint").textContent = generatedClips.length
-            ? "Generated clips are ready to preview or download."
-            : "No clips were returned by the run.";
-          show("directResult", data);
-          show("result", data);
-          await loadCases();
-          await loadClips();
+          document.getElementById("youtubeQuery").value = data.query;
+          show("youtubeResult", {
+            youtube: data.youtube,
+            query: data.query,
+            metadata: data.metadata,
+            nextStep: "Upload the Shazam screenshot, read the segment, then run the full process."
+          });
         } catch (error) {
-          renderClipList("directClipList", []);
-          document.getElementById("directClipHint").textContent = "No valid clips were generated for this run.";
-          show("directResult", error.message);
+          show("youtubeResult", error.message);
         }
+      }
+
+      async function readYoutubeSegmentScreenshot() {
+        await readSegmentScreenshotFor("youtubeScreenshot", "youtubeSegmentStart", "youtubeSegmentEnd", "youtubeVideoSeconds", "youtubeResult");
+      }
+
+      async function runYoutube() {
+        await runFullProcess({
+          queryId: "youtubeQuery",
+          providerId: "youtubeProvider",
+          shazamUrlId: "youtubeShazamUrl",
+          startId: "youtubeSegmentStart",
+          endId: "youtubeSegmentEnd",
+          videoId: "youtubeVideoSeconds",
+          resultId: "youtubeResult",
+          clipListId: "youtubeClipList",
+          clipHintId: "youtubeClipHint"
+        });
       }
 
       async function loadHealth() {
