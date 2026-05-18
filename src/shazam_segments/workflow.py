@@ -3,9 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .cases import build_case, load_case, popular_segment, query_from_shazam_url, slugify, write_case
+from .cases import build_case, load_case, popular_segment, query_from_shazam_url, shazam_track_id_from_url, slugify, write_case
 from .extract import download_audio, extract_clip
-from .metadata import search_deezer, search_itunes
+from .metadata import lookup_itunes_track, search_deezer, search_itunes
 
 
 def search_metadata(provider: str, query: str) -> dict[str, Any] | None:
@@ -14,6 +14,35 @@ def search_metadata(provider: str, query: str) -> dict[str, Any] | None:
     if provider == "itunes":
         return search_itunes(query)
     raise ValueError(f"unsupported provider: {provider}")
+
+
+def resolve_metadata(provider: str, query: str = "", shazam_url: str | None = None) -> tuple[str, dict[str, Any]]:
+    resolved_query = query.strip()
+    seed_metadata = None
+
+    if not resolved_query:
+        track_id = shazam_track_id_from_url(shazam_url)
+        if track_id is not None:
+            seed_metadata = lookup_itunes_track(track_id)
+            if seed_metadata is not None:
+                resolved_query = " ".join(
+                    part for part in (seed_metadata.get("artist"), seed_metadata.get("title")) if part
+                )
+
+    if not resolved_query:
+        resolved_query = query_from_shazam_url(shazam_url) or ""
+    if not resolved_query:
+        raise ValueError("query or Shazam URL is required")
+
+    if provider == "itunes" and seed_metadata is not None:
+        return resolved_query, seed_metadata
+
+    metadata = search_metadata(provider, resolved_query)
+    if metadata is None and seed_metadata is not None:
+        metadata = seed_metadata
+    if metadata is None:
+        raise ValueError("no metadata result found")
+    return resolved_query, metadata
 
 
 def create_case(
@@ -25,13 +54,7 @@ def create_case(
     segment_end: str | None = None,
     shazam_url: str | None = None,
 ) -> dict[str, Any]:
-    resolved_query = query.strip() or (query_from_shazam_url(shazam_url) or "")
-    if not resolved_query:
-        raise ValueError("query or Shazam URL is required")
-
-    metadata = search_metadata(provider, resolved_query)
-    if metadata is None:
-        raise ValueError("no metadata result found")
+    resolved_query, metadata = resolve_metadata(provider, query, shazam_url)
 
     case_slug = slug or slugify(f"{metadata.get('artist', '')}-{metadata.get('title', '')}")
     case_path = Path(cases_dir) / case_slug / "metadata.json"

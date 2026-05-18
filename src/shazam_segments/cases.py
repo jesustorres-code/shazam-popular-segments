@@ -51,6 +51,19 @@ def query_from_shazam_url(url: str | None) -> str | None:
     return query or None
 
 
+def shazam_track_id_from_url(url: str | None) -> int | None:
+    if not url:
+        return None
+
+    parsed = urllib.parse.urlparse(url)
+    parts = [part for part in parsed.path.split("/") if part]
+    if len(parts) >= 2 and parts[-2] == "song" and parts[-1].isdigit():
+        return int(parts[-1])
+    if len(parts) >= 3 and parts[-3] == "song" and parts[-2].isdigit():
+        return int(parts[-2])
+    return None
+
+
 def build_case(
     metadata: dict[str, Any],
     query: str,

@@ -8,8 +8,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from . import __version__
-from .cases import query_from_shazam_url
-from .workflow import create_case, extract_case, list_cases, list_clips, search_metadata
+from .workflow import create_case, extract_case, list_cases, list_clips, resolve_metadata, search_metadata
 
 
 app = FastAPI(
@@ -92,15 +91,12 @@ def metadata(query: str, provider: Literal["deezer", "itunes"] = "deezer"):
 
 @app.post("/resolve")
 def post_resolve(request: ResolveRequest):
-    resolved_query = request.query.strip() or (query_from_shazam_url(request.shazamUrl) or "")
-    if not resolved_query:
-        raise HTTPException(status_code=400, detail="query or Shazam URL is required")
     try:
-        result = search_metadata(request.provider, resolved_query)
+        resolved_query, result = resolve_metadata(request.provider, request.query, request.shazamUrl)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:  # pragma: no cover - defensive API wrapper
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-    if result is None:
-        raise HTTPException(status_code=404, detail="No result found")
     return {"query": resolved_query, "metadata": result}
 
 

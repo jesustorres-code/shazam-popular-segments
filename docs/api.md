@@ -44,7 +44,7 @@ curl 'http://127.0.0.1:8000/metadata?query=EL%20DE%20LA%20TINTA%20Sahir%20Montoy
 
 ### Resolve
 
-Derives a query from a Shazam URL when `query` is empty, then resolves provider metadata. This does not extract clips and does not invent a Shazam Popular Segment.
+Uses the Shazam `/song/<id>/<slug>` ID for Apple/iTunes lookup when available, then resolves provider metadata. If ID lookup is unavailable, it derives a query from the final Shazam URL slug. This does not extract clips and does not invent a Shazam Popular Segment.
 
 ```bash
 curl -X POST http://127.0.0.1:8000/resolve \

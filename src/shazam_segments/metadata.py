@@ -47,3 +47,21 @@ def search_itunes(query: str) -> dict[str, Any] | None:
         "preview": track.get("previewUrl"),
         "url": track.get("trackViewUrl"),
     }
+
+
+def lookup_itunes_track(track_id: int) -> dict[str, Any] | None:
+    data = _fetch_json(f"https://itunes.apple.com/lookup?id={track_id}&entity=song")
+    results = data.get("results") or []
+    if not results:
+        return None
+    track = results[0]
+    millis = track.get("trackTimeMillis")
+    return {
+        "provider": "itunes",
+        "title": track.get("trackName"),
+        "artist": track.get("artistName"),
+        "trackId": track.get("trackId"),
+        "durationSeconds": round(millis / 1000) if isinstance(millis, int) else None,
+        "preview": track.get("previewUrl"),
+        "url": track.get("trackViewUrl"),
+    }

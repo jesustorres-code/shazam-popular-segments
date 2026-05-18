@@ -1,6 +1,6 @@
 import unittest
 
-from shazam_segments.cases import build_case, popular_segment, query_from_shazam_url, slugify
+from shazam_segments.cases import build_case, popular_segment, query_from_shazam_url, shazam_track_id_from_url, slugify
 from shazam_segments.timecode import duration_from_range, format_seconds, parse_timecode
 
 
@@ -52,6 +52,12 @@ class TimecodeTests(unittest.TestCase):
         self.assertEqual(
             query_from_shazam_url("https://www.shazam.com/song/1471572221/smack-that-feat-eminem?referrer=browserextension"),
             "smack that feat eminem",
+        )
+
+    def test_shazam_track_id_from_url(self):
+        self.assertEqual(
+            shazam_track_id_from_url("https://www.shazam.com/song/1443123583/go"),
+            1443123583,
         )
 
 
