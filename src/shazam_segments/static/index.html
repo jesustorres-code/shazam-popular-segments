@@ -105,36 +105,17 @@
             <h2>YouTube Music</h2>
             <label for="youtubeUrl">YouTube Music URL</label>
             <input id="youtubeUrl" placeholder="https://music.youtube.com/watch?v=..." />
-            <label for="youtubeProvider">Provider</label>
-            <select id="youtubeProvider">
-              <option value="deezer">Deezer Preview</option>
-              <option value="itunes">iTunes Preview</option>
-            </select>
-            <label for="youtubeQuery">Resolved Song Query</label>
-            <input id="youtubeQuery" placeholder="Filled from YouTube Music" />
-            <label for="youtubeShazamUrl">Shazam URL</label>
-            <input id="youtubeShazamUrl" placeholder="Optional Shazam URL for case history" />
-            <label for="youtubeScreenshot">Shazam Screenshot</label>
-            <input id="youtubeScreenshot" type="file" accept="image/*" />
-            <p class="hint">Paste YouTube Music first, then use a Shazam screenshot to read the Popular Segment.</p>
-            <label for="youtubeSegmentStart">Shazam Segment Start</label>
-            <input id="youtubeSegmentStart" value="00:00" />
-            <label for="youtubeSegmentEnd">Shazam Segment End</label>
-            <input id="youtubeSegmentEnd" value="00:00" />
-            <label for="youtubeVideoSeconds">Video Seconds</label>
-            <input id="youtubeVideoSeconds" value="0" />
-            <button class="secondary" onclick="resolveYoutube()">Find Song</button>
-            <button class="secondary" onclick="readYoutubeSegmentScreenshot()">Read Segment</button>
-            <button onclick="runYoutube()">Run Full Process</button>
+            <p class="hint">Paste a YouTube Music song URL to resolve the track and preview audio.</p>
+            <button onclick="resolveYoutube()">Find Preview</button>
           </section>
           <section>
-            <h2>YouTube Result</h2>
+            <h2>Found Information</h2>
             <pre id="youtubeResult">Paste YouTube Music URL, then find song.</pre>
           </section>
           <section class="full">
-            <h2>Generated Segments</h2>
-            <div class="clip-list" id="youtubeClipList"></div>
-            <p class="hint" id="youtubeClipHint">Run the full process to preview and download the generated MP3 segments.</p>
+            <h2>Preview</h2>
+            <div class="clip-list" id="youtubePreview"></div>
+            <p class="hint" id="youtubePreviewHint">The resolved preview appears here.</p>
           </section>
         </div>
       </div>
@@ -248,6 +229,20 @@
           { path: extract && extract.popularClip },
           { path: extract && extract.videoClip }
         ].filter((clip) => clip.path);
+      }
+
+      function renderExternalPreview(targetId, metadata) {
+        const list = document.getElementById(targetId);
+        list.innerHTML = "";
+        if (!metadata || !metadata.preview) return;
+        const item = document.createElement("div");
+        item.className = "clip-item";
+        item.innerHTML = "<strong></strong><audio controls preload=\"none\"></audio><a target=\"_blank\" rel=\"noreferrer\">Open source</a>";
+        item.querySelector("strong").textContent = [metadata.artist, metadata.title].filter(Boolean).join(" - ");
+        item.querySelector("audio").src = metadata.preview;
+        item.querySelector("a").href = metadata.url || metadata.preview;
+        item.querySelector("a").textContent = metadata.url ? "Open Track" : "Open Preview";
+        list.appendChild(item);
       }
 
       function validateRunFields(resultId, segmentStart, segmentEnd, videoSeconds) {
@@ -376,43 +371,31 @@
 
       async function resolveYoutube() {
         try {
+          renderExternalPreview("youtubePreview", null);
+          document.getElementById("youtubePreviewHint").textContent = "Finding preview...";
           show("youtubeResult", "Finding YouTube Music song...");
           const data = await request("youtube-music/resolve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               url: document.getElementById("youtubeUrl").value,
-              provider: document.getElementById("youtubeProvider").value
+              provider: "itunes"
             })
           });
-          document.getElementById("youtubeQuery").value = data.query;
+          renderExternalPreview("youtubePreview", data.metadata);
+          document.getElementById("youtubePreviewHint").textContent = data.metadata.preview
+            ? "Preview ready."
+            : "No preview URL was returned for this track.";
           show("youtubeResult", {
             youtube: data.youtube,
             query: data.query,
-            metadata: data.metadata,
-            nextStep: "Upload the Shazam screenshot, read the segment, then run the full process."
+            metadata: data.metadata
           });
         } catch (error) {
+          renderExternalPreview("youtubePreview", null);
+          document.getElementById("youtubePreviewHint").textContent = "No preview available.";
           show("youtubeResult", error.message);
         }
-      }
-
-      async function readYoutubeSegmentScreenshot() {
-        await readSegmentScreenshotFor("youtubeScreenshot", "youtubeSegmentStart", "youtubeSegmentEnd", "youtubeVideoSeconds", "youtubeResult");
-      }
-
-      async function runYoutube() {
-        await runFullProcess({
-          queryId: "youtubeQuery",
-          providerId: "youtubeProvider",
-          shazamUrlId: "youtubeShazamUrl",
-          startId: "youtubeSegmentStart",
-          endId: "youtubeSegmentEnd",
-          videoId: "youtubeVideoSeconds",
-          resultId: "youtubeResult",
-          clipListId: "youtubeClipList",
-          clipHintId: "youtubeClipHint"
-        });
       }
 
       async function loadHealth() {
