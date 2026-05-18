@@ -275,6 +275,8 @@
             show("directResult", "Set Video Seconds above 0 before running.");
             return;
           }
+          renderClipList("directClipList", []);
+          document.getElementById("directClipHint").textContent = "Running full process...";
           show("directResult", "Running...");
           const data = await request("run", {
             method: "POST",
@@ -299,6 +301,8 @@
           await loadCases();
           await loadClips();
         } catch (error) {
+          renderClipList("directClipList", []);
+          document.getElementById("directClipHint").textContent = "No valid clips were generated for this run.";
           show("directResult", error.message);
         }
       }
