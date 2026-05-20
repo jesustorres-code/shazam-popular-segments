@@ -14,6 +14,14 @@ Browser
   -> JSON response in the browser
 ```
 
+## Browser UI
+
+The Flask page exposes URL lookup, editable YouTube Music credentials, metadata preview, and full-audio download from one browser screen.
+
+![YouTube Music lookup UI with credentials redacted](assets/youtube-music-lookup-redacted.jpg)
+
+The screenshot above is intentionally redacted. Never commit real YouTube/Google cookies to the repository.
+
 ## Install
 
 ```bash
