@@ -130,6 +130,14 @@ For YouTube Music links, paste the URL in the YouTube Music tab. If public metad
 
 The Flask downloader runs on port 7777 and supports YouTube Music lookup, editable browser-local cookies, preview metadata, and full-audio download through `yt-dlp`.
 
+Current public test URL:
+
+```text
+https://equal-restaurants-express-springs.trycloudflare.com/
+```
+
+This is a temporary Cloudflare quick tunnel URL for testing. If the tunnel is restarted, Cloudflare may issue a different URL.
+
 ![YouTube Music lookup UI with credentials redacted](docs/assets/youtube-music-lookup-redacted.jpg)
 
 See [docs/flask-youtube-music.md](docs/flask-youtube-music.md) for setup and API details.
