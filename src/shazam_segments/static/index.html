@@ -22,7 +22,8 @@
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
       section { background: #fff; border: 1px solid #d8dbe2; border-radius: 8px; padding: 16px; }
       label { display: block; font-size: 13px; font-weight: 650; margin: 12px 0 6px; }
-      input, select { width: 100%; box-sizing: border-box; border: 1px solid #c8ccd5; border-radius: 6px; padding: 10px; font: inherit; }
+      input, select, textarea { width: 100%; box-sizing: border-box; border: 1px solid #c8ccd5; border-radius: 6px; padding: 10px; font: inherit; }
+      textarea { min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
       button { border: 0; border-radius: 6px; padding: 10px 13px; margin-top: 14px; background: #1167d8; color: #fff; font-weight: 700; cursor: pointer; }
       button.secondary { background: #2f3440; }
       .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -105,7 +106,14 @@
             <h2>YouTube Music</h2>
             <label for="youtubeUrl">YouTube Music URL</label>
             <input id="youtubeUrl" placeholder="https://music.youtube.com/watch?v=..." />
-            <p class="hint">Paste a YouTube Music song URL to resolve the track and preview audio.</p>
+            <label for="youtubeProvider">Preview Provider</label>
+            <select id="youtubeProvider">
+              <option value="deezer">Deezer Preview</option>
+              <option value="itunes">iTunes Preview</option>
+            </select>
+            <label for="youtubeCookies">Cookies</label>
+            <textarea id="youtubeCookies" spellcheck="false" placeholder="Paste Netscape cookies.txt lines or a raw Cookie header"></textarea>
+            <p class="hint">Paste browser-exported YouTube cookies when the public lookup is incomplete. Cookies are used for this request only and are not saved.</p>
             <button onclick="resolveYoutube()">Find Preview</button>
           </section>
           <section>
@@ -379,13 +387,14 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               url: document.getElementById("youtubeUrl").value,
-              provider: "itunes"
+              provider: document.getElementById("youtubeProvider").value,
+              cookiesText: document.getElementById("youtubeCookies").value || null
             })
           });
           renderExternalPreview("youtubePreview", data.metadata);
-          document.getElementById("youtubePreviewHint").textContent = data.metadata.preview
+          document.getElementById("youtubePreviewHint").textContent = data.metadata && data.metadata.preview
             ? "Preview ready."
-            : "No preview URL was returned for this track.";
+            : "YouTube Music info was found, but no external preview URL was returned.";
           show("youtubeResult", {
             youtube: data.youtube,
             query: data.query,

@@ -124,6 +124,8 @@ http://127.0.0.1:8000/
 
 The dashboard can list generated clips, play them in-browser, and download them as MP3 files.
 
+For YouTube Music links, paste the URL in the YouTube Music tab. If public metadata is incomplete, paste browser-exported YouTube cookies in Netscape `cookies.txt` format or as a raw `Cookie:` header; the API uses them only for that one request and does not save them.
+
 The "Direct Run" tab separates URL lookup from clip extraction:
 
 1. Use "Find Song" with a song query or Shazam URL. If Song Query is empty, it derives a search query from the Shazam URL slug.

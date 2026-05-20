@@ -1,4 +1,5 @@
 # Local/generated media
+outputs/
 outputs/clips/
 inputs/screenshots/
 
@@ -9,6 +10,7 @@ tmp/
 cache/
 build/
 dist/
+tools/cloudflared
 *.egg-info/
 __pycache__/
 *.py[cod]

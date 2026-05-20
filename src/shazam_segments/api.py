@@ -72,6 +72,7 @@ class ResolveRequest(BaseModel):
 class YoutubeMusicResolveRequest(BaseModel):
     url: str
     provider: Literal["deezer", "itunes"] = "deezer"
+    cookiesText: str | None = None
 
 
 @app.get("/health")
@@ -110,13 +111,20 @@ def post_resolve(request: ResolveRequest):
 @app.post("/youtube-music/resolve")
 def post_youtube_music_resolve(request: YoutubeMusicResolveRequest):
     try:
-        youtube = resolve_youtube_music_url(request.url)
-        resolved_query, result = resolve_metadata(request.provider, youtube["query"])
+        youtube = resolve_youtube_music_url(request.url, request.cookiesText)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:  # pragma: no cover - defensive API wrapper
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-    return {"youtube": youtube, "query": resolved_query, "metadata": result}
+
+    try:
+        resolved_query, result = resolve_metadata(request.provider, youtube["query"])
+        metadata_error = None
+    except Exception as exc:  # pragma: no cover - provider lookups are best-effort here
+        resolved_query = youtube["query"]
+        result = None
+        metadata_error = str(exc)
+    return {"youtube": youtube, "query": resolved_query, "metadata": result, "metadataError": metadata_error}
 
 
 @app.post("/segment-from-screenshot")

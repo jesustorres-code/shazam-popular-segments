@@ -120,6 +120,20 @@ curl http://127.0.0.1:8000/clips
 curl -O http://127.0.0.1:8000/clips/holanda-popular-00-05.mp3
 ```
 
+### YouTube Music Resolve With Cookies
+
+The dashboard accepts either Netscape `cookies.txt` rows exported from the browser or a raw `Cookie:` header. Cookies are used only in-memory for that request and are not written to case files.
+
+```bash
+curl -X POST http://127.0.0.1:8000/youtube-music/resolve \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "url": "https://music.youtube.com/watch?v=rOC4rMWFnOo",
+    "provider": "itunes",
+    "cookiesText": "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1893456000\tSID\t..."
+  }'
+```
+
 ## Current Limitations
 
 - Jobs are synchronous.
