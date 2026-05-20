@@ -126,6 +126,14 @@ The dashboard can list generated clips, play them in-browser, and download them 
 
 For YouTube Music links, paste the URL in the YouTube Music tab. If public metadata is incomplete, paste browser-exported YouTube cookies in Netscape `cookies.txt` format or as a raw `Cookie:` header; the API uses them only for that one request and does not save them.
 
+### Flask YouTube Music Downloader
+
+The Flask downloader runs on port 7777 and supports YouTube Music lookup, editable browser-local cookies, preview metadata, and full-audio download through `yt-dlp`.
+
+![YouTube Music lookup UI with credentials redacted](docs/assets/youtube-music-lookup-redacted.jpg)
+
+See [docs/flask-youtube-music.md](docs/flask-youtube-music.md) for setup and API details.
+
 The "Direct Run" tab separates URL lookup from clip extraction:
 
 1. Use "Find Song" with a song query or Shazam URL. If Song Query is empty, it derives a search query from the Shazam URL slug.
